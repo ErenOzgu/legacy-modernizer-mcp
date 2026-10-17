@@ -213,6 +213,10 @@ Adding a rule: append a `Rule(...)` to the right list in `src/legacy_modernizer_
 - Optional diff-style fix suggestions for the mechanical rules
 - SARIF output for CI use
 
+## Author
+
+Eren Özgü ([@ErenOzgu](https://github.com/ErenOzgu)), built with Claude Code.
+
 ## License
 
 [MIT](LICENSE)
