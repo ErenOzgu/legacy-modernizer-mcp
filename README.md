@@ -32,7 +32,9 @@
 With [`uv`](https://docs.astral.sh/uv/) installed, one command adds the server to Claude Code:
 
 ```bash
-claude mcp add legacy-modernizer -- uvx --from git+https://github.com/ErenOzgu/legacy-modernizer-mcp legacy-modernizer-mcp
+claude mcp add legacy-modernizer -- \
+  uvx --from git+https://github.com/ErenOzgu/legacy-modernizer-mcp \
+  legacy-modernizer-mcp
 ```
 
 Then ask:
@@ -43,7 +45,7 @@ Claude Desktop, pip and plain-CLI setups are in [Install](#install).
 
 ## What you get
 
-| | |
+| Capability | Details |
 |---|---|
 | **A map of the damage** | 52 rules (31 Python 2 → 3, 20 Django, 1 template) with file and line, a fix for each, and the Django release that removed each API. |
 | **A ranked list of where to start** | Files scored by weighted findings, so you know which five files hold most of the work. |
@@ -98,7 +100,9 @@ pip install git+https://github.com/ErenOzgu/legacy-modernizer-mcp
 <summary><b>Claude Code</b></summary>
 
 ```bash
-claude mcp add legacy-modernizer -- uvx --from git+https://github.com/ErenOzgu/legacy-modernizer-mcp legacy-modernizer-mcp
+claude mcp add legacy-modernizer -- \
+  uvx --from git+https://github.com/ErenOzgu/legacy-modernizer-mcp \
+  legacy-modernizer-mcp
 ```
 
 </details>
