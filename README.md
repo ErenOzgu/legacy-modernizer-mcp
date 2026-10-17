@@ -1,18 +1,71 @@
-# legacy-modernizer-mcp
+<p align="center">
+  <img src="docs/banner.svg" alt="legacy-modernizer-mcp: scan, rank and plan the migration of a legacy Python 2 / Django code base" width="100%">
+</p>
 
-[![CI](https://github.com/ErenOzgu/legacy-modernizer-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/ErenOzgu/legacy-modernizer-mcp/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+<p align="center">
+  <a href="https://github.com/ErenOzgu/legacy-modernizer-mcp/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/ErenOzgu/legacy-modernizer-mcp/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
+  <img alt="Python 3.11+" src="https://img.shields.io/badge/python-3.11%2B-3776AB?logo=python&logoColor=white">
+  <img alt="MCP server" src="https://img.shields.io/badge/MCP-server-0B6E78">
+  <img alt="52 rules" src="https://img.shields.io/badge/rules-52-2FB6C4">
+  <img alt="read-only" src="https://img.shields.io/badge/analysis-read--only-4CC38A">
+</p>
 
-An [MCP](https://modelcontextprotocol.io) server that helps an AI assistant (Claude Desktop, Claude Code, any MCP client) **assess and plan the migration of a legacy Python 2 / old Django code base**.
+<p align="center">
+  An <a href="https://modelcontextprotocol.io">MCP</a> server that tells your AI assistant <b>how bad a legacy Python 2 / old Django code base is, where the work is, and in what order to do it</b>.<br>
+  Works with Claude Desktop, Claude Code and any MCP client.
+</p>
 
-Point it at a project directory and it answers the questions you have before touching a line of code: *How bad is it? Where is the work? In what order should I do it? Which dependencies will block me?*
+<p align="center">
+  <a href="#quick-start">Quick start</a> ·
+  <a href="#what-you-get">What you get</a> ·
+  <a href="#example">Example</a> ·
+  <a href="#tools">Tools</a> ·
+  <a href="#rules">Rules</a> ·
+  <a href="#limitations">Limitations</a>
+</p>
 
-- **52 rules**: 31 for Python 2 → 3, 20 for Django APIs removed between 1.x and 5.x, 1 for templates. Every rule has an explanation, a fix and (for Django) the release that removed the API.
-- **Requirements analysis**: detects the pinned Django version, flags Python 2-only or obsolete packages (`MySQL-python`, `PIL`, `South`, ...) and unpinned requirements.
-- **Migration plan**: phased and ordered (safety net → Python 2/3 compatibility → Django 1.11 on 2.7 → switch to Python 3 → climb LTS releases), with the files that need the most work and a checklist for what static analysis cannot see.
-- **Read-only and safe**: it reads source files as text. It never imports, executes or modifies the code it scans, and it skips symlinks, virtualenvs, `.git`, `node_modules` and files over 1 MB.
+---
+
+## Quick start
+
+With [`uv`](https://docs.astral.sh/uv/) installed, one command adds the server to Claude Code:
+
+```bash
+claude mcp add legacy-modernizer -- uvx --from git+https://github.com/ErenOzgu/legacy-modernizer-mcp legacy-modernizer-mcp
+```
+
+Then ask:
+
+> *Use legacy-modernizer to plan the Python 3 migration of ~/work/my-old-django-app.*
+
+Claude Desktop, pip and plain-CLI setups are in [Install](#install).
+
+## What you get
+
+| | |
+|---|---|
+| **A map of the damage** | 52 rules (31 Python 2 → 3, 20 Django, 1 template) with file and line, a fix for each, and the Django release that removed each API. |
+| **A ranked list of where to start** | Files scored by weighted findings, so you know which five files hold most of the work. |
+| **An ordered plan** | Six phases from safety net to clean-up, with the Django APIs that block each LTS upgrade and a checklist for what static analysis cannot see. |
+| **A dependency check** | Detects the pinned Django version, flags Python 2-only packages (`MySQL-python`, `PIL`, `South`, ...) and unpinned requirements. |
+| **Safe by construction** | Reads source files as text. Never imports, executes or modifies the code it scans; skips symlinks, virtualenvs, `.git`, `node_modules` and files over 1 MB. |
 
 > Findings are **heuristic** (regular expressions over source with comments and string contents masked out), not a parse tree. Counts are a lower bound; confirm each finding in context. See [Limitations](#limitations).
+
+## Example
+
+<p align="center">
+  <img src="docs/demo.svg" alt="Condensed migration plan for the bundled Django 1.7 fixture project" width="760">
+</p>
+
+<p align="center"><sub>Condensed view of <code>legacy-modernizer-mcp plan tests/fixtures/legacy_project</code>, a small deliberately-old Django 1.7 app. The full plan is in <a href="examples/sample-output.md"><code>examples/sample-output.md</code></a>.</sub></p>
+
+The plan it produces is organised in six phases. Python and Django move in separate steps, so you are never changing both at once:
+
+<p align="center">
+  <img src="docs/phases.svg" alt="Six migration phases: safety net, Python 2/3 compatibility, Django to 1.11, switch to Python 3, climb LTS releases, clean up" width="100%">
+</p>
 
 ## Tools
 
@@ -41,13 +94,17 @@ or with pip:
 pip install git+https://github.com/ErenOzgu/legacy-modernizer-mcp
 ```
 
-### Claude Code
+<details>
+<summary><b>Claude Code</b></summary>
 
 ```bash
 claude mcp add legacy-modernizer -- uvx --from git+https://github.com/ErenOzgu/legacy-modernizer-mcp legacy-modernizer-mcp
 ```
 
-### Claude Desktop
+</details>
+
+<details>
+<summary><b>Claude Desktop</b></summary>
 
 Add this to `claude_desktop_config.json` and restart the app:
 
@@ -66,11 +123,10 @@ Add this to `claude_desktop_config.json` and restart the app:
 }
 ```
 
-Then ask, for example: *"Use legacy-modernizer to plan the Python 3 migration of ~/work/my-old-django-app."*
+</details>
 
-### Without an MCP client
-
-The same analysis is available from the command line:
+<details>
+<summary><b>Without an MCP client (command line)</b></summary>
 
 ```bash
 legacy-modernizer-mcp plan path/to/project   # print a migration plan
@@ -78,39 +134,16 @@ legacy-modernizer-mcp rules                  # print the rule catalogue
 legacy-modernizer-mcp                        # no arguments: run the MCP server on stdio
 ```
 
-## Example
-
-Abridged output of `legacy-modernizer-mcp plan tests/fixtures/legacy_project` (a small deliberately-old Django 1.7 app; the full output is in [`examples/sample-output.md`](examples/sample-output.md)):
-
-```text
-## Snapshot
-
-|                           |                               |
-|---------------------------|-------------------------------|
-| Python files              | 8 (90 non-blank lines)        |
-| Django                    | 1.7 (from `==1.7.11`)         |
-| Python 2 -> 3 findings    | 18 errors, 3 warnings, 0 info |
-| Legacy Django findings    | 18 errors, 2 warnings, 0 info |
-| Dependency issues         | 6 flagged, 1 unpinned         |
-
-## Where the work is
-
-1. `shop/utils.py`: score 37, 11 error(s)
-2. `shop/views.py`: score 33, 11 error(s)
-3. `shop/settings.py`: score 18, 6 error(s)
-...
-
-#### Django APIs that block upgrades in this code base
-
-| Fix before moving to | Rule | Count |
-|---|---|---|
-| Django 1.10 | `DJ-PATTERNS`: urlpatterns built with patterns() | 2 |
-| Django 2.0  | `DJ-FK-ON-DELETE`: ForeignKey / OneToOneField without on_delete | 2 |
-| Django 3.0  | `DJ-RENDER-TO-RESPONSE`: render_to_response | 2 |
-...
-```
+</details>
 
 ## Rules
+
+52 built-in rules. Run `legacy-modernizer-mcp rules` or the `explain_rule` tool for the explanation and fix of each one.
+
+<details>
+<summary><b>Show all rules</b></summary>
+
+<br>
 
 **Python 2 → 3**
 
@@ -179,9 +212,19 @@ Abridged output of `legacy-modernizer-mcp plan tests/fixtures/legacy_project` (a
 |---|---|---|---|
 | `TPL-LOAD-FROM-FUTURE` | error | {% load ... from future %} | 1.9 |
 
-Run `legacy-modernizer-mcp rules` or the `explain_rule` tool for the full explanation and fix of each rule.
+</details>
 
 ## How it works
+
+```mermaid
+flowchart LR
+    A["Your project<br/>(read-only)"] --> B["Mask comments<br/>and strings"]
+    B --> C["52 rules<br/>regex + small checks"]
+    C --> D["Findings<br/>file:line, fix"]
+    D --> E["Report and plan<br/>(Markdown)"]
+    E --> F["6 MCP tools"]
+    F --> G["Claude or any<br/>MCP client"]
+```
 
 1. `scanner.py` walks the project and, for each file, builds a *masked* copy of the source in which comments are blanked and string contents are replaced by filler (same length, same newlines), so `print "x"` inside a docstring is not a finding but the real thing is. Rules that need string text (for example `'south'` in `INSTALLED_APPS`) run on a variant that keeps strings.
 2. `rules.py` is a declarative table of `Rule` objects (id, severity, explanation, fix, pattern). One rule, `DJ-FK-ON-DELETE`, uses a small custom check that reads the call's arguments so `ForeignKey(User, models.CASCADE)` is not reported.
@@ -208,10 +251,11 @@ Adding a rule: append a `Rule(...)` to the right list in `src/legacy_modernizer_
 
 ## Roadmap
 
-- `pyproject.toml` / `Pipfile` / `setup.py` dependency parsing
-- Per-file `explain_finding` with surrounding context
-- Optional diff-style fix suggestions for the mechanical rules
-- SARIF output for CI use
+- [x] 52 rules, requirements analysis, migration plan, CI
+- [ ] `pyproject.toml` / `Pipfile` / `setup.py` dependency parsing
+- [ ] Per-file `explain_finding` with surrounding context
+- [ ] Optional diff-style fix suggestions for the mechanical rules
+- [ ] SARIF output for CI use
 
 ## Author
 
