@@ -1,0 +1,7 @@
+Django==1.7.11
+MySQL-python==1.2.5
+PIL==1.1.7
+South==1.0.2
+simplejson
+mock==1.0.1
+six==1.10.0
