@@ -25,6 +25,10 @@
   <a href="#limitations">Limitations</a>
 </p>
 
+<p align="center">
+  <b>English</b> · <a href="README.tr.md">Türkçe</a>
+</p>
+
 ---
 
 ## Quick start
